@@ -79,7 +79,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="bg-gradient-to-tr from-blue-600 to-blue-400 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
                 <Wrench size={20} className="fill-current" />
               </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 tracking-tight">SkillConnect</span>
+              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 tracking-tight whitespace-nowrap">SkillConnect</span>
             </div>
 
             {/* Desktop Navigation - Added 'desktop-nav' class for critical CSS */}

@@ -7,7 +7,9 @@
     
     <!-- Critical CSS: Guarantees layout works even if Tailwind is slow/fails -->
     <style>
-      /* 1. Prevent Horizontal Scroll / Zoom Out */
+      /* 1. Global Resets for Stability */
+      * { box-sizing: border-box; }
+      
       html, body {
         width: 100%;
         overflow-x: hidden;
@@ -17,15 +19,33 @@
         -webkit-tap-highlight-color: transparent;
       }
 
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+
       /* 2. Strict Navigation Visibility Control */
-      /* By default (Mobile), hide desktop elements */
+      
+      /* Mobile Defaults */
       .desktop-nav { display: none !important; }
       .mobile-nav { display: flex !important; }
+      
+      /* Bottom Bar: Fixed on mobile, hidden on desktop */
+      .mobile-bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: 9999;
+        display: flex !important;
+      }
 
-      /* On Desktop (768px+), show desktop, hide mobile */
+      /* Desktop Overrides (768px+) */
       @media (min-width: 768px) {
         .desktop-nav { display: flex !important; }
         .mobile-nav { display: none !important; }
+        .mobile-bottom-bar { display: none !important; }
       }
 
       /* 3. Utility Fallbacks */

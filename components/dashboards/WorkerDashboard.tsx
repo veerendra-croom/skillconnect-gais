@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -545,7 +546,7 @@ const WorkerDashboard: React.FC = () => {
   };
 
   return (
-    <div className="pb-20 md:pb-0">
+    <>
       {renderContent()}
 
       {/* New Job Alert Modal */}
@@ -574,8 +575,8 @@ const WorkerDashboard: React.FC = () => {
       </Modal>
 
       {/* Bottom Navigation for Mobile */}
-      <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-[0_-5px_30px_rgba(0,0,0,0.08)] md:hidden z-40 pb-safe">
-        <div className="flex justify-around items-center h-20">
+      <div className="mobile-bottom-bar bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-[0_-5px_30px_rgba(0,0,0,0.08)] z-40 pb-safe">
+        <div className="flex justify-around items-center h-20 w-full">
           <button 
              onClick={() => setActiveTab('jobs')}
              className={`flex flex-col items-center justify-center w-full h-full relative transition-all active:scale-95 group ${activeTab === 'jobs' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
@@ -605,7 +606,7 @@ const WorkerDashboard: React.FC = () => {
           </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

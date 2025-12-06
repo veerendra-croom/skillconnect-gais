@@ -585,8 +585,8 @@ const CustomerDashboard: React.FC = () => {
       </div>
 
       {/* Bottom Nav for Mobile */}
-      <div className="fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-lg md:hidden z-40 pb-safe">
-        <div className="flex justify-around items-center h-16">
+      <div className="mobile-bottom-bar bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-lg z-40 pb-safe">
+        <div className="flex justify-around items-center h-16 w-full">
           <button 
              onClick={() => setActiveTab('home')}
              className={`flex flex-col items-center justify-center w-full h-full relative ${activeTab === 'home' ? 'text-blue-600' : 'text-gray-400'}`}
