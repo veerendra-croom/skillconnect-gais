@@ -57,7 +57,7 @@ const LandingPage: React.FC = () => {
   return (
     <div className="flex flex-col overflow-hidden">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center pt-20 bg-gray-50">
+      <section className="relative min-h-[90vh] flex items-center pt-20 pb-12 bg-gray-50">
         
         {/* Animated Blobs Background */}
         <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none">
@@ -66,19 +66,20 @@ const LandingPage: React.FC = () => {
             <div className="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-pink-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-12 items-center">
+        <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             
             {/* Text Content */}
-            <div className="text-center md:text-left animate-slide-up">
+            <div className="text-center md:text-left animate-slide-up order-1">
                 <div className="inline-flex items-center px-3 py-1 rounded-full bg-blue-100/50 border border-blue-200 text-blue-700 text-sm font-semibold mb-6">
                     <span className="w-2 h-2 rounded-full bg-blue-600 mr-2 animate-pulse"></span>
                     #1 Platform for Local Services
                 </div>
-                <h1 className="text-5xl md:text-7xl font-black text-gray-900 leading-tight mb-6 tracking-tight">
+                {/* Use hero-title class for robust responsive sizing */}
+                <h1 className="hero-title font-black text-gray-900 leading-tight mb-6 tracking-tight">
                     Expert help,<br/>
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">right next door.</span>
                 </h1>
-                <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">
+                <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto md:mx-0">
                     From leaky taps to wiring fixes, find trusted professionals in your neighborhood instantly. Verified, fast, and secure.
                 </p>
                 
@@ -93,9 +94,9 @@ const LandingPage: React.FC = () => {
             </div>
 
             {/* Visual / Search Card */}
-            <div className="relative animate-slide-up" style={{animationDelay: '0.2s'}}>
+            <div className="relative animate-slide-up order-2" style={{animationDelay: '0.2s'}}>
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-purple-600 rounded-2xl rotate-3 opacity-10 blur-xl"></div>
-                <Card glass className="relative p-8 md:p-10 border-white/50 shadow-2xl">
+                <Card glass className="relative p-6 md:p-10 border-white/50 shadow-2xl">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6">Quick Book</h3>
                     
                     <div className="space-y-4">
@@ -107,7 +108,7 @@ const LandingPage: React.FC = () => {
                                 value={locationQuery}
                                 onChange={(e) => setLocationQuery(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                className="input-field w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                             />
                         </div>
                         <div className="group relative">
@@ -118,7 +119,7 @@ const LandingPage: React.FC = () => {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                className="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                className="input-field w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                             />
                         </div>
                         <Button size="lg" className="w-full h-14 text-lg mt-2" onClick={handleSearch}>
@@ -161,7 +162,7 @@ const LandingPage: React.FC = () => {
             </button>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
             {loading ? (
               Array(6).fill(0).map((_, i) => (
                  <div key={i} className="h-40 bg-gray-100 rounded-2xl animate-pulse"></div>
@@ -172,12 +173,12 @@ const LandingPage: React.FC = () => {
                   key={idx} 
                   hover 
                   onClick={() => navigate(`/dashboard?q=${encodeURIComponent(cat.name)}`)}
-                  className="group flex flex-col items-center justify-center text-center p-6 border border-gray-100 bg-gray-50/30 hover:bg-white hover:border-blue-100 cursor-pointer"
+                  className="group flex flex-col items-center justify-center text-center p-4 md:p-6 border border-gray-100 bg-gray-50/30 hover:bg-white hover:border-blue-100 cursor-pointer"
                 >
-                  <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
                     {getIcon(cat.icon)}
                   </div>
-                  <h3 className="font-bold text-gray-900">{cat.name}</h3>
+                  <h3 className="font-bold text-gray-900 text-sm md:text-base">{cat.name}</h3>
                   <p className="text-xs font-medium text-blue-600 mt-2 bg-blue-50 px-2 py-1 rounded-md">
                      From ₹{cat.base_price}
                   </p>

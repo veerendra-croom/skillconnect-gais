@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -20,7 +21,7 @@ const Card: React.FC<CardProps> = ({
   return (
     <div 
       className={`
-        relative overflow-hidden rounded-2xl transition-all duration-300
+        card relative overflow-hidden rounded-2xl transition-all duration-300
         ${glass 
           ? 'glass' 
           : 'bg-white border border-gray-100'}

@@ -7,8 +7,8 @@
     
     <!-- Critical CSS: Guarantees layout works even if Tailwind is slow/fails -->
     <style>
-      /* 1. Global Resets for Stability */
-      * { box-sizing: border-box; }
+      /* 1. Global Resets */
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
       
       html, body {
         width: 100%;
@@ -16,22 +16,89 @@
         margin: 0;
         padding: 0;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        -webkit-tap-highlight-color: transparent;
+        background-color: #f9fafb;
+        color: #111827;
       }
 
-      img {
-        max-width: 100%;
-        height: auto;
-        display: block;
+      img { max-width: 100%; height: auto; display: block; }
+
+      /* 2. Critical Component Styles (Fallback design) */
+      
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.75rem; /* 12px */
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        text-decoration: none;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(to right, #2563eb, #1d4ed8);
+        color: white !important;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+      }
+      
+      .btn-secondary {
+        background: linear-gradient(to right, #10b981, #059669);
+        color: white !important;
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
       }
 
-      /* 2. Strict Navigation Visibility Control */
+      .btn-outline {
+        background: white;
+        border: 1px solid #e5e7eb;
+        color: #374151 !important;
+      }
+
+      .btn-ghost {
+        background: transparent;
+        color: #4b5563;
+      }
+
+      /* Cards */
+      .card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        border: 1px solid #f3f4f6;
+      }
       
-      /* Mobile Defaults */
-      .desktop-nav { display: none !important; }
-      .mobile-nav { display: flex !important; }
+      .glass {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+
+      /* Inputs */
+      .input-field {
+        width: 100%;
+        border-radius: 0.75rem;
+        border: 1px solid #d1d5db;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        background-color: white;
+        outline: none;
+      }
+      .input-field:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      /* Typography Helpers */
+      .hero-title {
+        font-size: 2.25rem;
+        line-height: 1.1;
+        font-weight: 900;
+        color: #111827;
+      }
       
-      /* Bottom Bar: Fixed on mobile, hidden on desktop */
+      /* 3. Layout Utilities */
       .mobile-bottom-bar {
         position: fixed;
         bottom: 0;
@@ -39,22 +106,23 @@
         width: 100%;
         z-index: 9999;
         display: flex !important;
+        background: white;
+        border-top: 1px solid #e5e7eb;
       }
 
-      /* Desktop Overrides (768px+) */
+      .desktop-nav { display: none !important; }
+      .mobile-nav { display: flex !important; }
+      .hidden { display: none !important; }
+
+      /* Desktop Overrides */
       @media (min-width: 768px) {
         .desktop-nav { display: flex !important; }
         .mobile-nav { display: none !important; }
         .mobile-bottom-bar { display: none !important; }
+        .hero-title { font-size: 4.5rem; }
       }
-
-      /* 3. Utility Fallbacks */
-      .hidden { display: none !important; }
       
-      /* 4. iOS Safe Area */
       .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-
-      /* 5. Scrollbar */
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -69,9 +137,6 @@
                 'float': 'float 6s ease-in-out infinite',
                 'slide-up': 'slideUp 0.5s ease-out forwards',
                 'fade-in': 'fadeIn 0.5s ease-out forwards',
-                'pulse-soft': 'pulseSoft 2s infinite',
-                'radar': 'radar 2s infinite',
-                'bounce-in': 'bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
               },
               keyframes: {
                 float: {
@@ -85,18 +150,6 @@
                 fadeIn: {
                   '0%': { opacity: '0' },
                   '100%': { opacity: '1' },
-                },
-                pulseSoft: {
-                  '0%, 100%': { opacity: '1' },
-                  '50%': { opacity: '0.7' },
-                },
-                radar: {
-                  '0%': { transform: 'scale(0.8)', opacity: '0.5' },
-                  '100%': { transform: 'scale(2)', opacity: '0' },
-                },
-                bounceIn: {
-                  '0%': { transform: 'scale(0.3)', opacity: '0' },
-                  '100%': { transform: 'scale(1)', opacity: '1' },
                 }
               }
             }
@@ -111,46 +164,9 @@
     <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
-    <!-- Custom Global Styles -->
-    <style>
-      /* Glassmorphism Utilities */
-      .glass {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-      }
-      
-      .glass-dark {
-        background: rgba(17, 24, 39, 0.7);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      /* Mesh Gradient Background */
-      .mesh-gradient {
-        background-color: #ffffff;
-        background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                          radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                          radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-      }
-      
-      .mesh-gradient-light {
-        background-color: #f3f4f6;
-        background-image: radial-gradient(at 40% 20%, hsla(210,100%,96%,1) 0px, transparent 50%),
-                          radial-gradient(at 80% 0%, hsla(189,100%,96%,1) 0px, transparent 50%),
-                          radial-gradient(at 0% 50%, hsla(341,100%,96%,1) 0px, transparent 50%);
-      }
-    </style>
-    
     <!-- PWA Manifest & Settings -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#3B82F6" />
-    <meta name="description" content="SkillConnect connects skilled workers with local opportunities.">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://picsum.photos/192/192">
   <script type="importmap">
 {
   "imports": {

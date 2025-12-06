@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -17,13 +18,15 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props 
 }) => {
-  const baseStyles = "relative inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-95";
+  // Use 'btn' and 'btn-variant' classes defined in index.html for instant styling
+  const baseStyles = "btn relative inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-95";
   
+  // Map internal variants to CSS class names and Tailwind utilities
   const variants = {
-    primary: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 border border-transparent",
-    secondary: "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 border border-transparent",
-    outline: "bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50/50",
-    ghost: "text-gray-600 hover:bg-gray-100/80 hover:text-gray-900"
+    primary: "btn-primary bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 border border-transparent",
+    secondary: "btn-secondary bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 border border-transparent",
+    outline: "btn-outline bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50/50",
+    ghost: "btn-ghost text-gray-600 hover:bg-gray-100/80 hover:text-gray-900"
   };
 
   const sizes = {
