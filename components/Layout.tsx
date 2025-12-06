@@ -129,13 +129,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             {/* Mobile Menu Button - Added 'mobile-nav' class for critical CSS */}
             <div className="flex md:hidden items-center space-x-3 mobile-nav">
                {isAuthenticated && (
-                   <button onClick={() => setIsNotifOpen(true)} className="p-2 text-gray-600 relative">
+                   <button onClick={() => setIsNotifOpen(true)} className="icon-btn p-2 text-gray-600 relative">
                        <Bell size={24} />
                        <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-white"></span>
                    </button>
                )}
                 <button 
-                className="p-2.5 text-gray-600 hover:bg-white/50 rounded-xl transition-colors active:scale-95"
+                className="icon-btn p-2.5 text-gray-600 hover:bg-white/50 rounded-xl transition-colors active:scale-95"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}

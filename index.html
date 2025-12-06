@@ -20,20 +20,55 @@
         color: #111827;
       }
 
-      img { max-width: 100%; height: auto; display: block; }
-
-      /* 2. Critical Component Styles (Fallback design) */
+      img, svg { max-width: 100%; height: auto; display: block; }
+      
+      /* 2. Critical Layout Utilities (Micro-Tailwind) */
+      /* These ensure flexbox and positioning work instantly before Tailwind loads */
+      .flex { display: flex !important; }
+      .flex-col { display: flex !important; flex-direction: column !important; }
+      .items-center { align-items: center !important; }
+      .justify-between { justify-content: space-between !important; }
+      .justify-center { justify-content: center !important; }
+      
+      .relative { position: relative !important; }
+      .absolute { position: absolute !important; }
+      .top-0 { top: 0 !important; }
+      .left-0 { left: 0 !important; }
+      .right-0 { right: 0 !important; }
+      .bottom-0 { bottom: 0 !important; }
+      
+      .w-full { width: 100% !important; }
+      .h-full { height: 100% !important; }
+      .min-h-screen { min-height: 100vh !important; }
+      
+      .hidden { display: none !important; }
+      
+      /* Spacing Helpers */
+      .mb-4 { margin-bottom: 1rem !important; }
+      .mb-6 { margin-bottom: 1.5rem !important; }
+      .p-4 { padding: 1rem !important; }
+      .py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+      .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+      
+      /* 3. Critical Component Styles */
       
       /* Buttons */
+      button, .btn {
+        appearance: none;
+        -webkit-appearance: none;
+        border: none;
+        background: transparent;
+        font-family: inherit;
+        cursor: pointer;
+      }
+
       .btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 0.75rem; /* 12px */
+        border-radius: 0.75rem;
         font-weight: 600;
-        cursor: pointer;
         transition: all 0.2s;
-        border: none;
         text-decoration: none;
       }
       
@@ -51,12 +86,18 @@
 
       .btn-outline {
         background: white;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e5e7eb !important;
         color: #374151 !important;
       }
 
       .btn-ghost {
         background: transparent;
+        color: #4b5563;
+      }
+      
+      .icon-btn {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
         color: #4b5563;
       }
 
@@ -76,6 +117,10 @@
       }
 
       /* Inputs */
+      input, textarea {
+        font-family: inherit;
+      }
+      
       .input-field {
         width: 100%;
         border-radius: 0.75rem;
@@ -84,6 +129,8 @@
         font-size: 1rem;
         background-color: white;
         outline: none;
+        appearance: none;
+        -webkit-appearance: none;
       }
       .input-field:focus {
         border-color: #2563eb;
@@ -98,7 +145,10 @@
         color: #111827;
       }
       
-      /* 3. Layout Utilities */
+      .text-center { text-align: center !important; }
+      .text-left { text-align: left !important; }
+
+      /* 4. Responsive Visibility */
       .mobile-bottom-bar {
         position: fixed;
         bottom: 0;
@@ -112,14 +162,16 @@
 
       .desktop-nav { display: none !important; }
       .mobile-nav { display: flex !important; }
-      .hidden { display: none !important; }
-
-      /* Desktop Overrides */
+      
+      /* Mobile Breakpoint Overrides */
       @media (min-width: 768px) {
         .desktop-nav { display: flex !important; }
         .mobile-nav { display: none !important; }
         .mobile-bottom-bar { display: none !important; }
         .hero-title { font-size: 4.5rem; }
+        .md\:flex { display: flex !important; }
+        .md\:hidden { display: none !important; }
+        .md\:grid-cols-2 { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
       }
       
       .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
