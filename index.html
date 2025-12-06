@@ -23,7 +23,6 @@
       img, svg { max-width: 100%; height: auto; display: block; }
       
       /* 2. Critical Layout Utilities (Micro-Tailwind) */
-      /* These ensure flexbox and positioning work instantly before Tailwind loads */
       .flex { display: flex !important; }
       .flex-col { display: flex !important; flex-direction: column !important; }
       .items-center { align-items: center !important; }
@@ -43,15 +42,44 @@
       
       .hidden { display: none !important; }
       
-      /* Spacing Helpers */
+      /* Spacing & Gaps */
+      .gap-1 { gap: 0.25rem !important; }
+      .gap-2 { gap: 0.5rem !important; }
+      .gap-3 { gap: 0.75rem !important; }
+      .gap-4 { gap: 1rem !important; }
+      .gap-6 { gap: 1.5rem !important; }
+      
       .mb-4 { margin-bottom: 1rem !important; }
       .mb-6 { margin-bottom: 1.5rem !important; }
       .p-4 { padding: 1rem !important; }
-      .py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
       .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+      .py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
       
-      /* 3. Critical Component Styles */
+      /* Polyfill for space-y-4 (children margin) */
+      .space-y-4 > * + * { margin-top: 1rem !important; }
       
+      /* 3. Component Styles */
+      
+      /* Logo Styles */
+      .logo-box {
+        background: #2563eb;
+        background: linear-gradient(135deg, #2563eb, #60a5fa);
+        color: white;
+        padding: 0.6rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+      }
+      .logo-text {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #1f2937;
+        letter-spacing: -0.025em;
+        white-space: nowrap;
+      }
+
       /* Buttons */
       button, .btn {
         appearance: none;
@@ -73,12 +101,14 @@
       }
       
       .btn-primary {
+        background: #2563eb; /* Fallback */
         background: linear-gradient(to right, #2563eb, #1d4ed8);
         color: white !important;
         box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
       }
       
       .btn-secondary {
+        background: #10b981;
         background: linear-gradient(to right, #10b981, #059669);
         color: white !important;
         box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
@@ -99,28 +129,24 @@
         padding: 0.5rem;
         border-radius: 0.5rem;
         color: #4b5563;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      /* Cards */
+      /* Cards & Inputs */
       .card {
         background: white;
         border-radius: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
         border: 1px solid #f3f4f6;
       }
-      
       .glass {
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.5);
       }
 
-      /* Inputs */
-      input, textarea {
-        font-family: inherit;
-      }
-      
       .input-field {
         width: 100%;
         border-radius: 0.75rem;
@@ -130,24 +156,20 @@
         background-color: white;
         outline: none;
         appearance: none;
-        -webkit-appearance: none;
       }
       .input-field:focus {
         border-color: #2563eb;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
-      /* Typography Helpers */
+      /* Typography */
       .hero-title {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
         line-height: 1.1;
         font-weight: 900;
         color: #111827;
       }
       
-      .text-center { text-align: center !important; }
-      .text-left { text-align: left !important; }
-
       /* 4. Responsive Visibility */
       .mobile-bottom-bar {
         position: fixed;
@@ -163,7 +185,6 @@
       .desktop-nav { display: none !important; }
       .mobile-nav { display: flex !important; }
       
-      /* Mobile Breakpoint Overrides */
       @media (min-width: 768px) {
         .desktop-nav { display: flex !important; }
         .mobile-nav { display: none !important; }
@@ -172,8 +193,11 @@
         .md\:flex { display: flex !important; }
         .md\:hidden { display: none !important; }
         .md\:grid-cols-2 { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        .md\:text-left { text-align: left !important; }
+        .md\:w-auto { width: auto !important; }
       }
       
+      .text-center { text-align: center; }
       .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

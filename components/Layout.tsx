@@ -76,13 +76,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="flex items-center space-x-2 cursor-pointer group" 
               onClick={() => navigate('/')}
             >
-              <div className="bg-gradient-to-tr from-blue-600 to-blue-400 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
+              <div className="logo-box bg-gradient-to-tr from-blue-600 to-blue-400 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
                 <Wrench size={20} className="fill-current" />
               </div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 tracking-tight whitespace-nowrap">SkillConnect</span>
+              <span className="logo-text text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 tracking-tight whitespace-nowrap">SkillConnect</span>
             </div>
 
-            {/* Desktop Navigation - Added 'desktop-nav' class for critical CSS */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-1 desktop-nav">
               {!isAuthenticated && (
                 <div className="flex bg-white/50 p-1 rounded-full mr-4 backdrop-blur-sm border border-white/50 transition-all hover:bg-white/80">
@@ -126,8 +126,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </div>
             </nav>
 
-            {/* Mobile Menu Button - Added 'mobile-nav' class for critical CSS */}
-            <div className="flex md:hidden items-center space-x-3 mobile-nav">
+            {/* Mobile Menu Button */}
+            <div className="flex md:hidden items-center gap-3 mobile-nav">
                {isAuthenticated && (
                    <button onClick={() => setIsNotifOpen(true)} className="icon-btn p-2 text-gray-600 relative">
                        <Bell size={24} />
@@ -146,7 +146,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Navigation Menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-gray-100 py-6 px-4 flex flex-col space-y-4 animate-slide-up shadow-2xl rounded-b-3xl mobile-nav">
+          <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-gray-100 py-6 px-4 flex flex-col space-y-4 gap-4 animate-slide-up shadow-2xl rounded-b-3xl mobile-nav">
              {!isAuthenticated && (
                <div className="space-y-1">
                 <NavLink to="/" icon={<Briefcase size={18} />} label="Home" />
@@ -174,7 +174,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                </div>
              )}
 
-            <div className="pt-2 flex flex-col space-y-3">
+            <div className="pt-2 flex flex-col gap-3">
               {isAuthenticated ? (
                 <Button variant="outline" className="w-full justify-start border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300" onClick={handleLogout}>
                   <LogOut size={18} className="mr-2" /> Sign Out

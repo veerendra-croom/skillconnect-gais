@@ -83,7 +83,7 @@ const LandingPage: React.FC = () => {
                     From leaky taps to wiring fixes, find trusted professionals in your neighborhood instantly. Verified, fast, and secure.
                 </p>
                 
-                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
                     <Button size="lg" className="w-full sm:w-auto text-lg shadow-blue-500/20" onClick={() => navigate('/login')}>
                         Get Started
                     </Button>
