@@ -66,6 +66,11 @@
         scrollbar-width: none;
       }
 
+      /* iOS Safe Area Support for Bottom Navigation */
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
       /* Glassmorphism Utilities */
       .glass {
         background: rgba(255, 255, 255, 0.7);
@@ -111,17 +116,17 @@
   <script type="importmap">
 {
   "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.1",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.556.0",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "vitest": "https://aistudiocdn.com/vitest@^4.0.15",
-    "vitest/": "https://aistudiocdn.com/vitest@^4.0.15/",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.9.1",
     "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.86.2",
-    "@testing-library/react": "https://aistudiocdn.com/@testing-library/react@^16.3.0"
+    "vitest/": "https://aistudiocdn.com/vitest@^4.0.15/",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "@testing-library/react": "https://aistudiocdn.com/@testing-library/react@^16.3.0",
+    "vitest": "https://aistudiocdn.com/vitest@^4.0.15",
+    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.9.1"
   }
 }
 </script>
