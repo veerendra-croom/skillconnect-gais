@@ -4,6 +4,8 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   hover?: boolean;
   noPadding?: boolean;
+  glass?: boolean;
+  active?: boolean;
 }
 
 const Card: React.FC<CardProps> = ({ 
@@ -11,13 +13,24 @@ const Card: React.FC<CardProps> = ({
   className = '', 
   hover = false, 
   noPadding = false,
+  glass = false,
+  active = false,
   ...props 
 }) => {
   return (
     <div 
-      className={`bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden ${
-        hover ? 'hover:shadow-md transition-shadow cursor-pointer' : ''
-      } ${!noPadding ? 'p-6' : ''} ${className}`}
+      className={`
+        relative overflow-hidden rounded-2xl transition-all duration-300
+        ${glass 
+          ? 'glass' 
+          : 'bg-white border border-gray-100'}
+        ${hover 
+          ? 'hover:-translate-y-1 hover:shadow-xl hover:shadow-gray-200/50 cursor-pointer' 
+          : 'shadow-sm shadow-gray-200/50'}
+        ${active ? 'ring-2 ring-blue-500 ring-offset-2' : ''}
+        ${!noPadding ? 'p-6' : ''} 
+        ${className}
+      `}
       {...props}
     >
       {children}

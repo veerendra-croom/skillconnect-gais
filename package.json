@@ -9,10 +9,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react-dom": "^19.2.0",
-    "react": "^19.2.0",
-    "lucide-react": "^0.555.0",
-    "react-router-dom": "^7.9.6"
+    "react-router-dom": "^7.10.1",
+    "lucide-react": "^0.556.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "react-dom": "^19.2.1",
+    "vitest": "^4.0.15",
+    "react": "^19.2.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@supabase/supabase-js": "^2.86.2",
+    "@testing-library/react": "^16.3.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
