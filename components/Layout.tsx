@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const NavLink = ({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) => (
     <button
       onClick={() => navigate(to)}
-      className="flex items-center space-x-2 text-gray-600 hover:text-blue-600 transition-colors px-3 py-2 rounded-xl hover:bg-blue-50 font-medium w-full text-left"
+      className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors px-3 py-2 rounded-xl hover:bg-blue-50 font-medium w-full text-left"
     >
       {icon}
       <span>{label}</span>
@@ -73,7 +73,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex justify-between items-center">
             {/* Logo */}
             <div 
-              className="flex items-center space-x-2 cursor-pointer group" 
+              className="flex items-center gap-2 cursor-pointer group" 
               onClick={() => navigate('/')}
             >
               <div className="logo-box bg-gradient-to-tr from-blue-600 to-blue-400 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-200">
@@ -83,7 +83,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-1 desktop-nav">
+            <nav className="hidden md:flex items-center gap-1 desktop-nav">
               {!isAuthenticated && (
                 <div className="flex bg-white/50 p-1 rounded-full mr-4 backdrop-blur-sm border border-white/50 transition-all hover:bg-white/80">
                   <button onClick={() => navigate('/')} className="px-4 py-1.5 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-white shadow-sm transition-all">Home</button>
@@ -93,7 +93,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               )}
               
               {isAuthenticated && (
-                 <div className="flex items-center mr-2 px-4 py-1.5 bg-white/60 rounded-full border border-white/50 backdrop-blur-sm shadow-sm space-x-3">
+                 <div className="flex items-center mr-2 px-4 py-1.5 bg-white/60 rounded-full border border-white/50 backdrop-blur-sm shadow-sm gap-3">
                     <span className="text-sm text-gray-600">Hello, <span className="font-bold text-blue-700">{user?.name}</span></span>
                     <button 
                        onClick={() => setIsNotifOpen(true)}
@@ -111,7 +111,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                  </div>
               )}
 
-              <div className="flex items-center space-x-3 ml-2">
+              <div className="flex items-center gap-3 ml-2">
                 {isAuthenticated ? (
                   <Button variant="ghost" size="sm" onClick={handleLogout} className="text-red-500 hover:bg-red-50 hover:text-red-600">
                     <LogOut size={16} className="mr-2" />
@@ -146,9 +146,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
         {/* Mobile Navigation Menu */}
         {isMenuOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-gray-100 py-6 px-4 flex flex-col space-y-4 gap-4 animate-slide-up shadow-2xl rounded-b-3xl mobile-nav">
+          <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-xl border-b border-gray-100 py-6 px-4 flex flex-col gap-4 animate-slide-up shadow-2xl rounded-b-3xl mobile-nav">
              {!isAuthenticated && (
-               <div className="space-y-1">
+               <div className="flex flex-col gap-1">
                 <NavLink to="/" icon={<Briefcase size={18} />} label="Home" />
                 <NavLink to="/about" icon={<Info size={18} />} label="About" />
                 <NavLink to="/contact" icon={<Phone size={18} />} label="Contact" />
@@ -156,7 +156,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
              )}
              
              {isAuthenticated && (
-               <div className="flex items-center space-x-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
+               <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100">
                  <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-blue-600 shadow-sm font-bold text-lg">
                     {user?.name?.[0]}
                  </div>
@@ -168,7 +168,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
              )}
 
              {isAuthenticated && (
-               <div className="space-y-1">
+               <div className="flex flex-col gap-1">
                    <NavLink to="/dashboard" icon={<Briefcase size={18} />} label="Dashboard" />
                    <NavLink to="/settings" icon={<Settings size={18} />} label="Settings" />
                </div>
@@ -206,7 +206,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-5 gap-12 mb-12">
           {/* Brand Column */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-6">
+            <div className="flex items-center gap-2 mb-6">
               <div className="bg-blue-600 text-white p-1.5 rounded-lg">
                 <Wrench size={24} />
               </div>
@@ -237,7 +237,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Link Columns */}
           <div>
             <h3 className="text-white font-bold mb-6 tracking-wide text-sm uppercase">Company</h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="flex flex-col gap-3 text-sm">
               <li><Link to="/about" className="hover:text-blue-400 transition-colors">About Us</Link></li>
               <li><Link to="/contact" className="hover:text-blue-400 transition-colors">Contact</Link></li>
               <li><a href="#" className="hover:text-blue-400 transition-colors">Careers</a></li>
@@ -247,7 +247,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <div>
             <h3 className="text-white font-bold mb-6 tracking-wide text-sm uppercase">Support</h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="flex flex-col gap-3 text-sm">
               <li><Link to="/help" className="hover:text-blue-400 transition-colors">Help Center</Link></li>
               <li><Link to="/safety" className="hover:text-blue-400 transition-colors">Trust & Safety</Link></li>
               <li><Link to="/terms" className="hover:text-blue-400 transition-colors">Worker Guidelines</Link></li>
@@ -258,7 +258,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div>
             <h3 className="text-white font-bold mb-6 tracking-wide text-sm uppercase">Download App</h3>
             <p className="text-xs text-gray-500 mb-4">Get the best experience on mobile.</p>
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
                <button className="w-full bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-2 flex items-center transition-all">
                   <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center mr-3">
                      <span className="text-black font-bold text-xl"></span>
@@ -284,11 +284,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {/* Bottom Bar */}
         <div className="container mx-auto px-4 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500">
           <p>© {new Date().getFullYear()} SkillConnect Inc. All rights reserved.</p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
+          <div className="flex gap-6 mt-4 md:mt-0">
              <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
              <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
              <a href="#" className="hover:text-white transition-colors">Sitemap</a>
-             <div className="flex items-center space-x-2">
+             <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                 <span className="text-green-500">Systems Operational</span>
              </div>

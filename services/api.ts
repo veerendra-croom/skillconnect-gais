@@ -12,11 +12,30 @@ export const api = {
       return data as ServiceCategory[];
     },
     search: async (query: string) => {
-      const { data, error } = await supabase
-        .rpc('search_categories', { keyword: query });
-      
-      if (error) throw error;
-      return data as ServiceCategory[];
+      try {
+        // Try RPC first for advanced server-side search
+        const { data, error } = await supabase
+          .rpc('search_categories', { keyword: query });
+        
+        if (error) throw error;
+        return data as ServiceCategory[];
+      } catch (rpcError) {
+        console.warn('RPC search_categories failed, falling back to client-side filter', rpcError);
+        
+        // Fallback: Fetch all and filter client-side
+        // This ensures the app works even if the DB function isn't set up yet
+        const { data, error } = await supabase
+          .from('service_categories')
+          .select('*');
+          
+        if (error) throw error;
+        
+        const lowerQ = query.toLowerCase();
+        return (data as ServiceCategory[]).filter(c => 
+            c.name.toLowerCase().includes(lowerQ) || 
+            (c.description && c.description.toLowerCase().includes(lowerQ))
+        );
+      }
     },
     create: async (name: string, basePrice: number, icon: string) => {
         const { error } = await supabase.from('service_categories').insert([{

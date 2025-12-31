@@ -4,7 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { ServiceCategory, JobStatus, Job, RazorpayResponse } from '../../types';
 import { supabase } from '../../services/supabase';
-import { MapPin, Clock, Search, Phone, MessageSquare, Star, Shield, History, Briefcase, User, Sparkles } from 'lucide-react';
+import { StorageService } from '../../services/storage';
+import { MapPin, Search, Phone, MessageSquare, Shield, History, Briefcase, User, Sparkles, Calendar, Clock, AlertCircle, Camera, X as XIcon, Image as ImageIcon } from 'lucide-react';
 import { LocationService } from '../../services/location';
 import Card from '../Card';
 import Button from '../Button';
@@ -17,6 +18,8 @@ import { useToast } from '../../context/ToastContext';
 import ChatWindow from '../ChatWindow';
 import CustomerProfileView from './CustomerProfileView';
 import JobCardSkeleton from '../skeletons/JobCardSkeleton';
+import CategoryIcon from '../CategoryIcon';
+import StatusStepper from '../StatusStepper'; 
 import { useSearchParams } from 'react-router-dom';
 
 // Add Razorpay window type
@@ -46,6 +49,9 @@ const CustomerDashboard: React.FC = () => {
   const [locationAddress, setLocationAddress] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [coords, setCoords] = useState<{lat: number, lng: number} | null>(null);
+  const [scheduledTime, setScheduledTime] = useState(''); 
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [isUploadingImages, setIsUploadingImages] = useState(false);
 
   // Review Modal State
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -69,7 +75,6 @@ const CustomerDashboard: React.FC = () => {
       try {
         if (!user?.id) return;
         
-        // Check for URL search param
         const query = searchParams.get('q');
         const loc = searchParams.get('loc');
         
@@ -79,7 +84,6 @@ const CustomerDashboard: React.FC = () => {
         let cats: ServiceCategory[] = [];
 
         if (query) {
-           // Use Full Text Search
            cats = await api.categories.search(query);
            if (cats.length === 0) {
                addToast(`No services found for "${query}". Showing all.`, 'info');
@@ -122,7 +126,6 @@ const CustomerDashboard: React.FC = () => {
       }
   };
 
-  // Realtime Subscription for Active Job
   useEffect(() => {
     if (!activeJob?.id || !user?.id) return;
 
@@ -134,9 +137,7 @@ const CustomerDashboard: React.FC = () => {
         table: 'jobs', 
         filter: `id=eq.${activeJob.id}` 
       }, () => {
-        // Refresh full job data
         api.jobs.getActiveForCustomer(user.id).then(setActiveJob);
-        // Also refresh history in case it just completed
         api.jobs.getHistoryForCustomer(user.id).then(setPastJobs);
       })
       .subscribe();
@@ -149,8 +150,25 @@ const CustomerDashboard: React.FC = () => {
   const handleCategoryClick = (cat: ServiceCategory) => {
     setSelectedCategory(cat);
     setCreateModalOpen(true);
-    // Attempt auto-location when modal opens if not already set from URL
+    setDescription('');
+    setScheduledTime('');
+    setSelectedImages([]);
     if (!locationAddress) handleGetLocation();
+  };
+
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      if (selectedImages.length + files.length > 5) {
+        addToast('Maximum 5 images allowed', 'warning');
+        return;
+      }
+      setSelectedImages(prev => [...prev, ...files]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleGetLocation = async () => {
@@ -158,7 +176,7 @@ const CustomerDashboard: React.FC = () => {
     try {
       const position = await LocationService.getCurrentPosition();
       setCoords(position);
-      setLocationAddress(`Lat: ${position.lat.toFixed(4)}, Lng: ${position.lng.toFixed(4)}`);
+      setLocationAddress(`Detected: ${position.lat.toFixed(4)}, ${position.lng.toFixed(4)}`);
       addToast('Location detected successfully', 'success');
     } catch (e: any) {
       addToast(e.message || 'Could not detect location', 'warning');
@@ -172,6 +190,14 @@ const CustomerDashboard: React.FC = () => {
     
     try {
       setLoading(true);
+      setIsUploadingImages(true);
+
+      const imageUrls: string[] = [];
+      for (const file of selectedImages) {
+        const path = await StorageService.uploadFile('job-images', file, user.id);
+        imageUrls.push(path);
+      }
+
       const newJob = await api.jobs.create({
         customer_id: user.id,
         category_id: selectedCategory.id,
@@ -179,16 +205,19 @@ const CustomerDashboard: React.FC = () => {
         location_address: locationAddress || 'Current Location',
         location_lat: coords?.lat,
         location_lng: coords?.lng,
+        scheduled_time: scheduledTime || undefined,
+        images: imageUrls
       });
+      
       setActiveJob(newJob); 
       setCreateModalOpen(false);
       addToast('Request posted! Finding workers...', 'success');
-      // Refetch to get expanded relations
       api.jobs.getActiveForCustomer(user.id).then(setActiveJob);
     } catch (e: any) {
       addToast(e.message, 'error');
     } finally {
       setLoading(false);
+      setIsUploadingImages(false);
     }
   };
 
@@ -199,16 +228,11 @@ const CustomerDashboard: React.FC = () => {
     try {
       const payAmount = activeJob.amount || (activeJob.category?.base_price || 300) + 50;
       
-      // 1. Create Order on Server
-      // NOTE: Ensure 'razorpay' Edge Function is deployed
       let order;
       try {
         order = await api.payment.createOrder(payAmount, activeJob.id);
       } catch (e) {
-        console.warn("Edge Function failed, using Mock Fallback if available or throwing error");
-        // Fallback for development if edge function not present
         if (process.env.NODE_ENV === 'development') {
-           console.log("Using Legacy Payment (Mock)");
            await api.jobs.completeJobPayment(activeJob.id, payAmount, activeJob.worker_id || '');
            handlePaymentSuccess(activeJob);
            return;
@@ -216,18 +240,19 @@ const CustomerDashboard: React.FC = () => {
         throw new Error("Payment initialization failed. Please try again.");
       }
 
-      // 2. Open Razorpay Options
+      const env = (import.meta as any).env || {};
+      const razorpayKey = env.VITE_RAZORPAY_KEY_ID || '';
+
       const options = {
-        key: "YOUR_RAZORPAY_KEY_ID", // Replace with your Public Key ID
+        key: razorpayKey, 
         amount: order.amount,
         currency: order.currency,
         name: "SkillConnect",
         description: `Payment for ${activeJob.category?.name}`,
-        image: "https://picsum.photos/100", // Logo
+        image: "https://picsum.photos/100", 
         order_id: order.id,
         handler: async function (response: RazorpayResponse) {
           try {
-             // 3. Verify on Server
              await api.payment.verifyPayment(
                  response, 
                  activeJob.id, 
@@ -272,22 +297,19 @@ const CustomerDashboard: React.FC = () => {
 
   const handleSubmitReview = async () => {
     if (!jobToReview?.id || !user?.id || !jobToReview.worker_id) return;
-
     if (reviewRating === 0) {
       addToast('Please select a star rating', 'warning');
       return;
     }
-
     try {
       setIsSubmittingReview(true);
       await api.reviews.create(
         jobToReview.id,
-        user.id, // Reviewer (Customer)
-        jobToReview.worker_id, // Reviewee (Worker)
+        user.id,
+        jobToReview.worker_id, 
         reviewRating,
         reviewComment
       );
-      
       addToast('Review submitted! Thank you.', 'success');
       setIsReviewModalOpen(false);
       setJobToReview(null);
@@ -307,11 +329,12 @@ const CustomerDashboard: React.FC = () => {
 
   const handleCancelJob = async () => {
      if (!activeJob?.id || !user?.id) return;
+     if(!window.confirm("Are you sure you want to cancel?")) return;
+     
      try {
        await api.jobs.updateStatus(activeJob.id, JobStatus.CANCELLED);
        setActiveJob(null);
        addToast('Job Request Cancelled', 'info');
-       // Update history
        const history = await api.jobs.getHistoryForCustomer(user.id);
        setPastJobs(history || []);
      } catch (e: any) {
@@ -331,7 +354,6 @@ const CustomerDashboard: React.FC = () => {
      }
   }
 
-  // Use Skeleton for loading state
   if (loading && !categories.length && !activeJob) {
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl space-y-8">
@@ -344,59 +366,58 @@ const CustomerDashboard: React.FC = () => {
   }
 
   const renderHome = () => {
-    // --- VIEW: ACTIVE JOB TRACKING ---
     if (activeJob) {
       return (
         <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
-          <h2 className="text-2xl font-bold text-gray-900">Current Booking</h2>
           
-          {/* Animated Status Banner */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-2xl shadow-xl shadow-blue-500/20 flex items-center justify-between relative overflow-hidden">
-            <div className="relative z-10">
-              <p className="text-blue-100 text-sm font-bold uppercase tracking-widest mb-1">Status Update</p>
-              <h3 className="text-2xl font-bold">
-                {activeJob.status === JobStatus.SEARCHING && 'Finding Professional...'}
-                {activeJob.status === JobStatus.ACCEPTED && 'Worker Assigned'}
-                {activeJob.status === JobStatus.ARRIVED && 'Worker Arrived'}
-                {activeJob.status === JobStatus.IN_PROGRESS && 'Work In Progress'}
-                {activeJob.status === JobStatus.COMPLETED_PENDING_PAYMENT && 'Job Completed'}
-                {activeJob.status === JobStatus.DISPUTED && 'Disputed / On Hold'}
-              </h3>
-            </div>
-            <div className="relative z-10 bg-white/10 backdrop-blur-md p-3 rounded-full border border-white/20">
-              {activeJob.status === JobStatus.SEARCHING ? (
-                <Search className="animate-pulse" size={32} />
-              ) : (
-                <Clock size={32} />
-              )}
-            </div>
-            
-            {/* Background pattern */}
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="flex justify-between items-end">
+            <h2 className="text-2xl font-bold text-gray-900">Current Booking</h2>
+            {activeJob.scheduled_time && (
+                <Badge variant="warning" className="mb-1 flex items-center bg-amber-50 text-amber-800 border-amber-200">
+                    <Calendar size={12} className="mr-1"/> 
+                    {new Date(activeJob.scheduled_time).toLocaleString(undefined, {
+                        month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric'
+                    })}
+                </Badge>
+            )}
+          </div>
+          
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-6">
+              <StatusStepper status={activeJob.status} />
+              
+              <div className="text-center mt-8">
+                 <h3 className="text-xl font-bold text-gray-900">
+                    {activeJob.status === JobStatus.SEARCHING && 'Finding Professional...'}
+                    {activeJob.status === JobStatus.ACCEPTED && 'Professional Assigned'}
+                    {activeJob.status === JobStatus.ARRIVED && 'Professional Arrived'}
+                    {activeJob.status === JobStatus.IN_PROGRESS && 'Work In Progress'}
+                    {activeJob.status === JobStatus.COMPLETED_PENDING_PAYMENT && 'Job Completed'}
+                    {activeJob.status === JobStatus.DISPUTED && 'Job Disputed'}
+                 </h3>
+                 <p className="text-gray-500 text-sm mt-1">
+                    {activeJob.status === JobStatus.SEARCHING && 'We are notifying experts nearby.'}
+                    {activeJob.status === JobStatus.ACCEPTED && `${activeJob.worker?.name} is on the way.`}
+                    {activeJob.status === JobStatus.ARRIVED && 'Please share the OTP below to start the job.'}
+                    {activeJob.status === JobStatus.IN_PROGRESS && 'Sit back and relax while the work gets done.'}
+                 </p>
+              </div>
           </div>
 
-          {/* Searching View with Radar Animation */}
           {activeJob.status === JobStatus.SEARCHING && (
-            <Card className="text-center py-12 border-blue-100 bg-blue-50/30">
-              <div className="relative w-48 h-48 mx-auto mb-8 flex items-center justify-center">
-                {/* Radar Ripples */}
+            <Card className="text-center py-8 border-blue-100 bg-blue-50/30">
+              <div className="relative w-32 h-32 mx-auto mb-6 flex items-center justify-center">
                 <div className="absolute w-full h-full bg-blue-500/10 rounded-full animate-radar"></div>
-                <div className="absolute w-32 h-32 bg-blue-500/20 rounded-full animate-radar" style={{animationDelay: '0.5s'}}></div>
-                <div className="relative z-10 bg-white rounded-full p-4 shadow-lg border-2 border-blue-100">
-                  <Search size={40} className="text-blue-600" />
+                <div className="absolute w-20 h-20 bg-blue-500/20 rounded-full animate-radar" style={{animationDelay: '0.5s'}}></div>
+                <div className="relative z-10 bg-white rounded-full p-3 shadow-lg border-2 border-blue-100">
+                  <CategoryIcon iconName={activeJob.category?.icon} size={32} className="text-blue-600" />
                 </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Broadcasting Request</h3>
-              <p className="text-gray-500 mb-8 max-w-xs mx-auto">
-                 We are notifying nearby {activeJob.category?.name || 'professionals'} about your request...
-              </p>
               <Button variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:border-red-300" onClick={handleCancelJob}>
                  Cancel Request
               </Button>
             </Card>
           )}
 
-          {/* Worker Details (If Accepted+) */}
           {activeJob.worker && (
             <Card className="border-l-4 border-l-blue-500">
               <div className="flex items-start space-x-4">
@@ -433,7 +454,6 @@ const CustomerDashboard: React.FC = () => {
             </Card>
           )}
 
-          {/* OTP Section (Before Start) */}
           {(activeJob.status === JobStatus.ACCEPTED || activeJob.status === JobStatus.ARRIVED) && (
             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-6 text-center">
                 <p className="text-emerald-800 text-xs font-bold uppercase tracking-widest mb-3">Share OTP to Start Job</p>
@@ -443,7 +463,6 @@ const CustomerDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Payment Section */}
           {activeJob.status === JobStatus.COMPLETED_PENDING_PAYMENT && (
             <Card className="border-2 border-blue-600 shadow-xl shadow-blue-200">
               <h3 className="text-lg font-bold mb-4 flex items-center"><Sparkles className="mr-2 text-yellow-500"/> Payment Due</h3>
@@ -472,14 +491,14 @@ const CustomerDashboard: React.FC = () => {
             </Card>
           )}
 
-          {/* Dispute Button */}
           {['ACCEPTED', 'ARRIVED', 'IN_PROGRESS'].includes(activeJob.status) && (
-             <button onClick={handleReportIssue} className="text-gray-400 text-xs hover:text-red-500 hover:underline w-full text-center transition-colors">
-                Report an issue with this job
-             </button>
+             <div className="text-center">
+                 <button onClick={handleReportIssue} className="text-gray-400 text-xs hover:text-red-500 hover:underline transition-colors flex items-center justify-center mx-auto">
+                    <AlertCircle size={12} className="mr-1"/> Report an issue
+                 </button>
+             </div>
           )}
 
-          {/* Chat Window */}
           {activeJob.worker && (
             <ChatWindow 
               jobId={activeJob.id} 
@@ -492,12 +511,9 @@ const CustomerDashboard: React.FC = () => {
       );
     }
 
-    // --- VIEW: CATEGORY SELECTION & HISTORY ---
     return (
       <div className="space-y-8 animate-fade-in">
-        {/* Welcome / Search */}
         <div className="relative bg-gradient-to-br from-blue-600 to-indigo-800 text-white p-8 md:p-10 rounded-3xl shadow-2xl shadow-blue-900/20 overflow-hidden">
-          {/* Decorative circles */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/10 rounded-full -ml-10 -mb-10 blur-xl"></div>
           
@@ -518,7 +534,6 @@ const CustomerDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Categories */}
         <div>
           <h2 className="text-lg font-bold text-gray-900 mb-4 px-1">
              {dashboardSearch ? `Results for "${dashboardSearch}"` : 'Services'}
@@ -531,9 +546,9 @@ const CustomerDashboard: React.FC = () => {
                 onClick={() => handleCategoryClick(cat)}
                 className="flex flex-col items-center justify-center py-8 border-transparent hover:border-blue-500 transition-all text-center group bg-white shadow-sm"
               >
-                <span className="text-4xl mb-4 transform group-hover:scale-110 transition-transform duration-300 drop-shadow-sm">
-                    {['⚡','wrench','hammer','droplet','palette'].includes(cat.icon) ? '🛠️' : cat.icon || '🛠️'}
-                </span>
+                <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300 drop-shadow-sm text-blue-600">
+                    <CategoryIcon iconName={cat.icon} size={40} />
+                </div>
                 <span className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{cat.name}</span>
                 <span className="text-xs text-blue-500 font-medium mt-1 bg-blue-50 px-2 py-0.5 rounded-md">
                     Starts ₹{cat.base_price}
@@ -543,7 +558,6 @@ const CustomerDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Past Jobs History */}
         {pastJobs.length > 0 && (
           <div>
             <h2 className="text-lg font-bold text-gray-900 mb-4 px-1 flex items-center">
@@ -553,8 +567,8 @@ const CustomerDashboard: React.FC = () => {
               {pastJobs.map(job => (
                 <Card key={job.id} className="flex justify-between items-center p-5 hover:bg-gray-50 transition-colors cursor-default">
                   <div className="flex items-center space-x-4">
-                     <div className="bg-gray-100 p-3 rounded-xl text-2xl">
-                       {job.category?.icon || '🔧'}
+                     <div className="bg-gray-100 p-3 rounded-xl text-gray-600">
+                       <CategoryIcon iconName={job.category?.icon} size={24} />
                      </div>
                      <div>
                        <h4 className="font-bold text-gray-900">{job.category?.name}</h4>
@@ -584,7 +598,6 @@ const CustomerDashboard: React.FC = () => {
          {activeTab === 'home' ? renderHome() : <CustomerProfileView />}
       </div>
 
-      {/* Bottom Nav for Mobile */}
       <div className="mobile-bottom-bar bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-lg z-40 pb-safe">
         <div className="flex justify-around items-center h-16 w-full">
           <button 
@@ -606,10 +619,9 @@ const CustomerDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Create Job Modal */}
       <Modal 
         isOpen={isCreateModalOpen} 
-        onClose={() => setCreateModalOpen(false)}
+        onClose={() => !isUploadingImages && setCreateModalOpen(false)}
         title={`Request ${selectedCategory?.name}`}
       >
         <div className="space-y-5">
@@ -624,6 +636,21 @@ const CustomerDashboard: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+
+          <div className="w-full">
+             <label className="block text-sm font-bold text-gray-800 mb-1.5 ml-1">Schedule Time (Optional)</label>
+             <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-500 z-10">
+                   <Clock size={18} />
+                </div>
+                <input 
+                   type="datetime-local"
+                   className="input-field w-full pl-11 pr-4 py-3 bg-white text-gray-900 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 outline-none"
+                   value={scheduledTime}
+                   onChange={(e) => setScheduledTime(e.target.value)}
+                />
+             </div>
+          </div>
           
           <div className="relative">
              <Input 
@@ -641,6 +668,30 @@ const CustomerDashboard: React.FC = () => {
              </button>
           </div>
 
+          <div className="w-full">
+             <label className="block text-sm font-bold text-gray-800 mb-1.5 ml-1">Attach Photos (Max 5)</label>
+             <div className="grid grid-cols-4 gap-2">
+                {selectedImages.map((file, idx) => (
+                    <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
+                        <img src={URL.createObjectURL(file)} className="w-full h-full object-cover" />
+                        <button 
+                          onClick={() => removeImage(idx)}
+                          className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 hover:bg-red-500 transition-colors"
+                        >
+                            <XIcon size={12} />
+                        </button>
+                    </div>
+                ))}
+                {selectedImages.length < 5 && (
+                    <label className="aspect-square bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-all">
+                        <Camera size={20} className="text-gray-400" />
+                        <span className="text-[10px] text-gray-500 mt-1 font-bold">ADD</span>
+                        <input type="file" multiple accept="image/*" className="hidden" onChange={handleImageSelect} />
+                    </label>
+                )}
+             </div>
+          </div>
+
           <div className="pt-2">
             <p className="text-sm text-gray-500 mb-2 flex justify-between px-1">
                 <span>Estimated Cost:</span>
@@ -650,18 +701,18 @@ const CustomerDashboard: React.FC = () => {
                 variant="primary" 
                 className="w-full h-12 text-lg shadow-blue-500/25" 
                 onClick={handleCreateJob}
-                isLoading={loading}
+                isLoading={loading || isUploadingImages}
+                disabled={!description || !locationAddress}
             >
-                Find Worker Now
+                {isUploadingImages ? 'Uploading Photos...' : (scheduledTime ? 'Schedule Booking' : 'Find Worker Now')}
             </Button>
           </div>
         </div>
       </Modal>
 
-      {/* Review Modal */}
       <Modal
         isOpen={isReviewModalOpen}
-        onClose={handleSkipReview} // Allow closing to skip
+        onClose={handleSkipReview}
         title="Rate your experience"
       >
         <div className="text-center space-y-6 py-4">

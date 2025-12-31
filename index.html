@@ -23,46 +23,62 @@
       img, svg { max-width: 100%; height: auto; display: block; }
       
       /* 2. Critical Layout Utilities (Micro-Tailwind) */
+      
+      /* Display & Flex */
       .flex { display: flex !important; }
       .flex-col { display: flex !important; flex-direction: column !important; }
       .items-center { align-items: center !important; }
-      .justify-between { justify-content: space-between !important; }
       .justify-center { justify-content: center !important; }
-      
-      .relative { position: relative !important; }
-      .absolute { position: absolute !important; }
-      .top-0 { top: 0 !important; }
-      .left-0 { left: 0 !important; }
-      .right-0 { right: 0 !important; }
-      .bottom-0 { bottom: 0 !important; }
-      
-      .w-full { width: 100% !important; }
-      .h-full { height: 100% !important; }
-      .min-h-screen { min-height: 100vh !important; }
-      
+      .justify-between { justify-content: space-between !important; }
       .hidden { display: none !important; }
       
-      /* Spacing & Gaps */
+      /* Grid System */
+      .grid { display: grid !important; }
+      .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      
+      /* Spacing & Gaps (Restored & Expanded) */
       .gap-1 { gap: 0.25rem !important; }
       .gap-2 { gap: 0.5rem !important; }
       .gap-3 { gap: 0.75rem !important; }
       .gap-4 { gap: 1rem !important; }
       .gap-6 { gap: 1.5rem !important; }
+
+      /* Positioning */
+      .relative { position: relative !important; }
+      .absolute { position: absolute !important; }
+      .top-0 { top: 0 !important; }
+      .top-1\/2 { top: 50% !important; }
+      .left-0 { left: 0 !important; }
+      .left-4 { left: 1rem !important; }
+      .right-0 { right: 0 !important; }
+      .bottom-0 { bottom: 0 !important; }
       
-      .mb-4 { margin-bottom: 1rem !important; }
-      .mb-6 { margin-bottom: 1.5rem !important; }
+      /* Transforms */
+      .-translate-y-1\/2 { transform: translateY(-50%) !important; }
+
+      /* Sizing */
+      .w-full { width: 100% !important; }
+      .h-full { height: 100% !important; }
+      .h-14 { height: 3.5rem !important; }
+      .min-h-screen { min-height: 100vh !important; }
+      
+      /* Spacing */
       .p-4 { padding: 1rem !important; }
+      .p-6 { padding: 1.5rem !important; }
       .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
       .py-4 { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+      .pl-12 { padding-left: 3rem !important; }
+      .mt-2 { margin-top: 0.5rem !important; }
+      .mt-4 { margin-top: 1rem !important; }
+      .mb-4 { margin-bottom: 1rem !important; }
+      .mb-6 { margin-bottom: 1.5rem !important; }
       
-      /* Polyfill for space-y-4 (children margin) */
-      .space-y-4 > * + * { margin-top: 1rem !important; }
-      
+      /* Text */
+      .text-center { text-align: center !important; }
+      .font-bold { font-weight: 700 !important; }
+
       /* 3. Component Styles */
-      
-      /* Logo Styles */
       .logo-box {
-        background: #2563eb;
         background: linear-gradient(135deg, #2563eb, #60a5fa);
         color: white;
         padding: 0.6rem;
@@ -72,15 +88,7 @@
         justify-content: center;
         box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
       }
-      .logo-text {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #1f2937;
-        letter-spacing: -0.025em;
-        white-space: nowrap;
-      }
 
-      /* Buttons */
       button, .btn {
         appearance: none;
         -webkit-appearance: none;
@@ -101,14 +109,13 @@
       }
       
       .btn-primary {
-        background: #2563eb; /* Fallback */
+        background: #2563eb;
         background: linear-gradient(to right, #2563eb, #1d4ed8);
         color: white !important;
         box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
       }
       
       .btn-secondary {
-        background: #10b981;
         background: linear-gradient(to right, #10b981, #059669);
         color: white !important;
         box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
@@ -118,11 +125,6 @@
         background: white;
         border: 1px solid #e5e7eb !important;
         color: #374151 !important;
-      }
-
-      .btn-ghost {
-        background: transparent;
-        color: #4b5563;
       }
       
       .icon-btn {
@@ -134,7 +136,6 @@
         justify-content: center;
       }
 
-      /* Cards & Inputs */
       .card {
         background: white;
         border-radius: 1rem;
@@ -156,13 +157,14 @@
         background-color: white;
         outline: none;
         appearance: none;
+        -webkit-appearance: none;
+        height: 3rem;
       }
       .input-field:focus {
         border-color: #2563eb;
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
-      /* Typography */
       .hero-title {
         font-size: 2.5rem;
         line-height: 1.1;
@@ -170,7 +172,7 @@
         color: #111827;
       }
       
-      /* 4. Responsive Visibility */
+      /* 4. Responsive */
       .mobile-bottom-bar {
         position: fixed;
         bottom: 0;
@@ -189,15 +191,18 @@
         .desktop-nav { display: flex !important; }
         .mobile-nav { display: none !important; }
         .mobile-bottom-bar { display: none !important; }
+        
         .hero-title { font-size: 4.5rem; }
-        .md\:flex { display: flex !important; }
-        .md\:hidden { display: none !important; }
-        .md\:grid-cols-2 { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        
+        .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+        .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+        
         .md\:text-left { text-align: left !important; }
-        .md\:w-auto { width: auto !important; }
+        .md\:p-10 { padding: 2.5rem !important; }
+        .md\:gap-12 { gap: 3rem !important; }
       }
       
-      .text-center { text-align: center; }
       .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
       .no-scrollbar::-webkit-scrollbar { display: none; }
       .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -213,6 +218,10 @@
                 'float': 'float 6s ease-in-out infinite',
                 'slide-up': 'slideUp 0.5s ease-out forwards',
                 'fade-in': 'fadeIn 0.5s ease-out forwards',
+                'slide-in': 'slideIn 0.3s ease-out forwards',
+                'bounce-in': 'bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards',
+                'radar': 'radar 2s infinite',
+                'pulse-soft': 'pulseSoft 2s infinite',
               },
               keyframes: {
                 float: {
@@ -226,6 +235,23 @@
                 fadeIn: {
                   '0%': { opacity: '0' },
                   '100%': { opacity: '1' },
+                },
+                slideIn: {
+                  '0%': { transform: 'translateX(100%)', opacity: '0' },
+                  '100%': { transform: 'translateX(0)', opacity: '1' },
+                },
+                bounceIn: {
+                  '0%': { transform: 'scale(0.8)', opacity: '0' },
+                  '70%': { transform: 'scale(1.05)', opacity: '1' },
+                  '100%': { transform: 'scale(1)', opacity: '1' },
+                },
+                radar: {
+                  '0%': { transform: 'scale(0.8)', opacity: '0.5' },
+                  '100%': { transform: 'scale(2)', opacity: '0' },
+                },
+                pulseSoft: {
+                   '0%, 100%': { opacity: '1' },
+                   '50%': { opacity: '0.7' },
                 }
               }
             }
@@ -256,7 +282,8 @@
     "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
     "@testing-library/react": "https://aistudiocdn.com/@testing-library/react@^16.3.0",
     "vitest": "https://aistudiocdn.com/vitest@^4.0.15",
-    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.9.1"
+    "@testing-library/jest-dom": "https://aistudiocdn.com/@testing-library/jest-dom@^6.9.1",
+    "vite": "https://aistudiocdn.com/vite@^7.2.6"
   }
 }
 </script>

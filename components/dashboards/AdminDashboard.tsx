@@ -11,6 +11,7 @@ import Input from '../Input';
 import { Check, X, Users, Activity, Settings, Trash2, AlertCircle, Search, Clock, DollarSign, TrendingUp, ChevronRight, Ban, Unlock, Download, RefreshCw } from 'lucide-react';
 import Modal from '../Modal';
 import Badge from '../Badge';
+import CategoryIcon from '../CategoryIcon';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'verifications' | 'live_jobs' | 'users' | 'financials' | 'disputes' | 'cms' | 'settings'>('verifications');
@@ -604,7 +605,7 @@ const AdminDashboard: React.FC = () => {
                                     <div key={cat.id} className="flex justify-between items-center bg-white/70 backdrop-blur-sm p-5 border border-gray-100 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all group">
                                         <div className="flex items-center space-x-4">
                                             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-3 rounded-xl text-blue-600 group-hover:scale-110 transition-transform shadow-sm border border-blue-100">
-                                                <Settings size={20} />
+                                                <CategoryIcon iconName={cat.icon} size={24} />
                                             </div>
                                             <div>
                                                 <span className="font-bold text-gray-900 block text-lg">{cat.name}</span>

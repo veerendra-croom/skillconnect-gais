@@ -2,10 +2,10 @@
 import { supabase } from './supabase';
 
 export const StorageService = {
-  uploadFile: async (bucket: 'avatars' | 'verification-docs', file: File, userId: string) => {
+  uploadFile: async (bucket: 'avatars' | 'verification-docs' | 'job-images', file: File, userId: string) => {
     // Generate a unique file path: folder/timestamp-filename
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
     const filePath = `${userId}/${fileName}`;
 
     const { data, error } = await supabase.storage
@@ -21,7 +21,7 @@ export const StorageService = {
     return data.path;
   },
 
-  getPublicUrl: (bucket: 'avatars', path: string) => {
+  getPublicUrl: (bucket: 'avatars' | 'job-images', path: string) => {
     const { data } = supabase.storage.from(bucket).getPublicUrl(path);
     return data.publicUrl;
   },

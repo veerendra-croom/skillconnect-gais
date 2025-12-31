@@ -14,6 +14,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import InstallPrompt from './components/InstallPrompt';
 import ToastContainer from './components/ToastContainer';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Static Pages
 import AboutPage from './pages/AboutPage';
@@ -23,55 +24,57 @@ import LegalPage from './pages/LegalPage';
 
 const App: React.FC = () => {
   return (
-    <ToastProvider>
-      <AuthProvider>
-        <HashRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/login" element={<AuthPage />} />
-              
-              {/* Informational Pages */}
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/help" element={<HelpPage />} />
-              <Route path="/terms" element={<LegalPage initialTab="terms" />} />
-              <Route path="/privacy" element={<LegalPage initialTab="privacy" />} />
-              <Route path="/safety" element={<LegalPage initialTab="privacy" />} />
+    <ErrorBoundary>
+      <ToastProvider>
+        <AuthProvider>
+          <HashRouter>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<AuthPage />} />
+                
+                {/* Informational Pages */}
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/help" element={<HelpPage />} />
+                <Route path="/terms" element={<LegalPage initialTab="terms" />} />
+                <Route path="/privacy" element={<LegalPage initialTab="privacy" />} />
+                <Route path="/safety" element={<LegalPage initialTab="privacy" />} />
 
-              <Route 
-                path="/dashboard" 
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/admin" 
-                element={
-                  <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
-                    <AdminPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/settings" 
-                element={
-                  <ProtectedRoute>
-                    <SettingsPage />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="/404" element={<NotFoundPage />} />
-              <Route path="*" element={<Navigate to="/404" replace />} />
-            </Routes>
-          </Layout>
-          <InstallPrompt />
-          <ToastContainer />
-        </HashRouter>
-      </AuthProvider>
-    </ToastProvider>
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <ProtectedRoute allowedRoles={[UserRole.ADMIN]}>
+                      <AdminPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/settings" 
+                  element={
+                    <ProtectedRoute>
+                      <SettingsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="/404" element={<NotFoundPage />} />
+                <Route path="*" element={<Navigate to="/404" replace />} />
+              </Routes>
+            </Layout>
+            <InstallPrompt />
+            <ToastContainer />
+          </HashRouter>
+        </AuthProvider>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 };
 

@@ -8,7 +8,7 @@ import { Job, JobStatus, WorkerStatus } from '../../types';
 import { supabase } from '../../services/supabase';
 import { useToast } from '../../context/ToastContext';
 import { useNativeNotification } from '../../hooks/useNativeNotification';
-import { MapPin, Navigation, Phone, Upload, AlertTriangle, Power, MessageSquare, Briefcase, Wallet as WalletIcon, User, Clock, ArrowRight, Search } from 'lucide-react';
+import { MapPin, Navigation, Phone, Upload, AlertTriangle, Power, MessageSquare, Briefcase, Wallet as WalletIcon, User, Clock, ArrowRight, Search, Calendar, Image as ImageIcon } from 'lucide-react';
 import Card from '../Card';
 import Button from '../Button';
 import Badge from '../Badge';
@@ -19,49 +19,37 @@ import FileUpload from '../FileUpload';
 import WalletView from './WalletView';
 import WorkerProfileView from './WorkerProfileView';
 import JobCardSkeleton from '../skeletons/JobCardSkeleton';
+import CategoryIcon from '../CategoryIcon';
 
 const WorkerDashboard: React.FC = () => {
   const { user } = useAuth();
   const { addToast } = useToast();
   const { fireNotification, requestPermission } = useNativeNotification();
   
-  // Navigation State
   const [activeTab, setActiveTab] = useState<'jobs' | 'wallet' | 'profile'>('jobs');
-
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [availableJobs, setAvailableJobs] = useState<Job[]>([]);
   const [isOnline, setIsOnline] = useState(user?.worker_status === WorkerStatus.ONLINE);
   const [loading, setLoading] = useState(true);
   const [workerLocation, setWorkerLocation] = useState<Coordinates | null>(null);
-
-  // Verification State
   const [verificationFile, setVerificationFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-
-  // OTP State for starting job
   const [otpInput, setOtpInput] = useState('');
   const [finalAmount, setFinalAmount] = useState('');
-
-  // New Job Alert
   const [newJobAlert, setNewJobAlert] = useState<Job | null>(null);
-
-  // Chat State
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
       fetchInitialState();
       setIsOnline(user.worker_status === WorkerStatus.ONLINE);
-      // Request notification permission on load
       requestPermission();
     }
   }, [user]);
 
-  // Realtime Listeners
   useEffect(() => {
     if (user?.worker_status !== WorkerStatus.ONLINE) return;
 
-    // Listen for NEW jobs (SEARCHING)
     const newJobSub = supabase
       .channel('public:jobs')
       .on('postgres_changes', { 
@@ -71,13 +59,9 @@ const WorkerDashboard: React.FC = () => {
         filter: 'status=eq.SEARCHING'
       }, (payload) => {
         const job = payload.new as Job;
-        
-        // Filter: Only alert if I have the skill for this job
         if (user?.skills && user.skills.includes(job.category_id)) {
             setNewJobAlert(job);
-            fetchAvailableJobs(); // Refresh list
-            
-            // Fire Native Notification
+            fetchAvailableJobs();
             fireNotification('New Job Opportunity!', {
                 body: `${job.description} nearby. Click to view.`,
                 tag: 'new-job'
@@ -86,7 +70,6 @@ const WorkerDashboard: React.FC = () => {
       })
       .subscribe();
 
-    // Listen for updates to MY active active job
     const myJobSub = activeJob ? supabase
       .channel(`my-job-${activeJob.id}`)
       .on('postgres_changes', { 
@@ -95,7 +78,7 @@ const WorkerDashboard: React.FC = () => {
         table: 'jobs', 
         filter: `id=eq.${activeJob.id}`
       }, () => {
-        fetchActiveJob(); // Refresh
+        fetchActiveJob();
       })
       .subscribe() : null;
 
@@ -108,14 +91,12 @@ const WorkerDashboard: React.FC = () => {
   const fetchInitialState = async () => {
     if (!user) return;
     setLoading(true);
-    
     try {
       const location = await LocationService.getCurrentPosition();
       setWorkerLocation(location);
     } catch (e) {
       console.warn("Could not fetch worker location", e);
     }
-
     await Promise.all([fetchActiveJob(), fetchAvailableJobs()]);
     setLoading(false);
   };
@@ -134,12 +115,8 @@ const WorkerDashboard: React.FC = () => {
     if (user?.worker_status !== WorkerStatus.ONLINE) return;
     try {
       const jobs = await api.jobs.getAvailableForWorker();
-      
-      // Client-side filtering by Skills
-      // In a massive production app, this should be done in the DB Query (api.ts)
       const mySkills = user?.skills || [];
       const filteredJobs = jobs.filter(job => mySkills.includes(job.category_id));
-      
       setAvailableJobs(filteredJobs || []);
     } catch (e) { console.error(e); }
   };
@@ -242,7 +219,23 @@ const WorkerDashboard: React.FC = () => {
       }
   };
 
-  // --- VIEW: UNVERIFIED / PENDING ---
+  const renderJobImages = (job: Job) => {
+    if (!job.images || job.images.length === 0) return null;
+    return (
+      <div className="flex space-x-2 overflow-x-auto no-scrollbar py-2">
+        {job.images.map((path, i) => (
+          <div key={i} className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
+            <img 
+               src={StorageService.getPublicUrl('job-images', path)} 
+               className="w-full h-full object-cover hover:scale-110 transition-transform cursor-pointer" 
+               onClick={() => window.open(StorageService.getPublicUrl('job-images', path), '_blank')}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   if (user?.worker_status === WorkerStatus.UNVERIFIED || user?.worker_status === WorkerStatus.PENDING_REVIEW) {
     return (
       <div className="max-w-md mx-auto py-12 space-y-6 animate-fade-in px-4">
@@ -286,14 +279,13 @@ const WorkerDashboard: React.FC = () => {
     );
   }
 
-  // --- RENDER CONTENT BASED ON TAB ---
   const renderContent = () => {
     if (activeTab === 'wallet') return <WalletView />;
     if (activeTab === 'profile') return <WorkerProfileView />;
 
     if (activeJob) {
       return (
-        <div className="max-w-2xl mx-auto space-y-6 animate-slide-up pb-24">
+        <div className="max-w-2xl mx-auto space-y-6 animate-slide-up pb-24 px-1">
           <div className="flex justify-between items-center mb-2">
               <h2 className="text-2xl font-bold text-gray-900">Active Job</h2>
               <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm border border-green-200">
@@ -301,15 +293,24 @@ const WorkerDashboard: React.FC = () => {
               </div>
           </div>
 
-          <Card glass className="shadow-2xl border-white/60 ring-4 ring-blue-50/50 relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-10 -mt-10"></div>
-            
+          <Card glass className="shadow-2xl border-white/60 relative overflow-hidden">
             <div className="relative z-10">
                 <div className="flex justify-between items-start mb-6">
                 <div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">{activeJob.category?.name}</h3>
-                    <p className="text-gray-500 text-sm leading-relaxed">{activeJob.description}</p>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-1 flex items-center">
+                       <CategoryIcon iconName={activeJob.category?.icon} size={28} className="mr-2 text-blue-600"/>
+                       {activeJob.category?.name}
+                    </h3>
+                    <p className="text-gray-500 text-sm leading-relaxed mb-4">{activeJob.description}</p>
+                    
+                    {/* Visual context for worker */}
+                    {renderJobImages(activeJob)}
+
+                    {activeJob.scheduled_time && (
+                         <div className="mt-4 inline-flex items-center text-amber-700 bg-amber-50 px-2 py-1 rounded text-xs font-bold">
+                            <Calendar size={12} className="mr-1"/> Scheduled: {new Date(activeJob.scheduled_time).toLocaleString()}
+                         </div>
+                    )}
                 </div>
                 <div className="text-right bg-white/50 p-2 rounded-xl border border-white/60 shadow-sm">
                     <div className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">₹{activeJob.category?.base_price}</div>
@@ -360,7 +361,7 @@ const WorkerDashboard: React.FC = () => {
                         <label className="text-xs font-bold text-blue-800 uppercase tracking-wider mb-2 block">Ask Customer for OTP</label>
                         <div className="flex space-x-2">
                             <Input 
-                                placeholder="Enter 4-digit OTP" 
+                                placeholder="4-digit OTP" 
                                 className="flex-1 bg-white text-center font-mono text-xl tracking-widest"
                                 value={otpInput}
                                 onChange={(e) => setOtpInput(e.target.value)}
@@ -398,17 +399,6 @@ const WorkerDashboard: React.FC = () => {
                 )}
                 </div>
             </div>
-             {/* Navigation Helper */}
-             {activeJob.status === JobStatus.ACCEPTED && (
-                 <div className="mt-6 text-center">
-                    <button 
-                        onClick={() => handleNavigate(activeJob.location_address, activeJob.location_lat, activeJob.location_lng)}
-                        className="text-blue-600 text-sm hover:text-blue-800 font-medium flex items-center justify-center w-full transition-colors"
-                    >
-                        <MapPin size={16} className="mr-1" /> Open in Google Maps
-                    </button>
-                 </div>
-             )}
           </Card>
           
           {activeJob.customer && (
@@ -423,13 +413,11 @@ const WorkerDashboard: React.FC = () => {
       );
     }
 
-    // Default Feed View
     const sortedJobs = getSortedJobs();
     const hasSkills = user?.skills && user.skills.length > 0;
 
     return (
       <div className="space-y-8 pb-24">
-        {/* Floating Status Bar */}
         <div className="flex justify-between items-center bg-white/80 backdrop-blur-xl p-5 rounded-3xl shadow-lg border border-white/60 sticky top-24 z-20">
           <div>
              <h1 className="text-xl font-bold text-gray-900 tracking-tight">Job Radar</h1>
@@ -451,27 +439,17 @@ const WorkerDashboard: React.FC = () => {
         </div>
 
         {!hasSkills && (
-             <div className="bg-amber-50 border border-amber-200 p-5 rounded-2xl text-amber-900 mb-4 flex items-start animate-fade-in shadow-sm">
+             <div className="bg-amber-50 border border-amber-200 p-5 rounded-2xl text-amber-900 mb-4 flex items-start animate-fade-in shadow-sm mx-1">
                  <AlertTriangle size={24} className="mr-4 flex-shrink-0 mt-0.5 text-amber-600"/>
                  <div>
                     <p className="font-bold text-lg">Setup Required</p>
-                    <p className="text-sm mt-1 leading-relaxed opacity-90">Please go to the <strong>Profile Tab</strong> and select your skills (e.g., Electrician, Plumber) to start receiving job alerts.</p>
+                    <p className="text-sm mt-1 leading-relaxed opacity-90">Please go to the <strong>Profile Tab</strong> and select your skills to start receiving job alerts.</p>
                  </div>
              </div>
         )}
 
-        {!isOnline && (
-          <div className="text-center py-20 px-6">
-             <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <Power className="text-gray-300" size={40} />
-             </div>
-             <h3 className="text-xl font-bold text-gray-900 mb-2">You're Offline</h3>
-             <p className="text-gray-500 max-w-xs mx-auto">Tap the power button above to go online and start accepting jobs in your area.</p>
-          </div>
-        )}
-
         {isOnline && hasSkills && (
-          <div className="space-y-4">
+          <div className="space-y-4 px-1">
              {loading ? (
                  <div className="space-y-4">
                      {[1,2,3].map(i => <JobCardSkeleton key={i} />)}
@@ -496,32 +474,39 @@ const WorkerDashboard: React.FC = () => {
                   {sortedJobs.map((job, idx) => (
                       <div 
                         key={job.id} 
-                        className="animate-slide-up hover:z-10 relative" 
+                        className="animate-slide-up" 
                         style={{animationDelay: `${idx * 100}ms`}}
                       >
                           <Card 
                             glass 
                             hover 
-                            className="border-l-4 border-l-blue-500 transition-all duration-300 active:scale-[0.98] group"
+                            className="border-l-4 border-l-blue-500 transition-all duration-300 group"
                           >
                             <div className="flex justify-between items-start">
-                                <div>
+                                <div className="flex-1 min-w-0">
                                   <div className="flex items-center space-x-2 mb-2">
-                                     <h4 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors">{job.category?.name}</h4>
+                                     <div className="bg-blue-50 p-1.5 rounded-lg text-blue-600">
+                                        <CategoryIcon iconName={job.category?.icon} size={20} />
+                                     </div>
+                                     <h4 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors truncate">{job.category?.name}</h4>
                                      {getDistanceText(job) && (
-                                       <Badge variant="info" className="flex items-center bg-blue-50 text-blue-700 border-blue-100 shadow-sm">
+                                       <Badge variant="info" className="flex items-center bg-blue-50 text-blue-700 border-blue-100 shadow-sm whitespace-nowrap">
                                          <MapPin size={10} className="mr-1"/> {getDistanceText(job)}
                                        </Badge>
                                      )}
                                   </div>
                                   <p className="text-sm text-gray-600 mt-2 line-clamp-2 leading-relaxed">{job.description}</p>
+                                  
+                                  {/* Preview images in the feed */}
+                                  {renderJobImages(job)}
+
                                   <p className="text-xs text-gray-400 mt-3 flex items-center font-medium">
                                       <Clock size={12} className="mr-1"/> {new Date(job.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                                       <span className="mx-2 text-gray-300">|</span>
-                                      <MapPin size={12} className="mr-1"/> {job.location_address}
+                                      <MapPin size={12} className="mr-1"/> {job.location_address.slice(0, 30)}...
                                   </p>
                                 </div>
-                                <div className="text-right pl-4 flex flex-col items-end">
+                                <div className="text-right pl-4 flex flex-col items-end flex-shrink-0">
                                   <div className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-lg font-bold text-lg border border-emerald-100 mb-3">
                                       ₹{job.category?.base_price}
                                   </div>
@@ -549,19 +534,19 @@ const WorkerDashboard: React.FC = () => {
     <>
       {renderContent()}
 
-      {/* New Job Alert Modal */}
       <Modal isOpen={!!newJobAlert} onClose={() => setNewJobAlert(null)} title="Nearby Opportunity">
          {newJobAlert && (
             <div className="text-center space-y-6 py-4">
                <div className="relative w-24 h-24 mx-auto">
                    <div className="absolute inset-0 bg-blue-500/20 rounded-full animate-radar"></div>
                    <div className="relative z-10 bg-gradient-to-br from-blue-500 to-indigo-600 w-full h-full rounded-full flex items-center justify-center shadow-lg text-white">
-                       <MapPin size={36} />
+                       <CategoryIcon iconName={newJobAlert.category?.icon} size={36} />
                    </div>
                </div>
                <div>
                   <h3 className="text-2xl font-bold text-gray-900 leading-tight">New {newJobAlert.category?.name} Request</h3>
                   <p className="text-gray-500 mt-3 leading-relaxed">{newJobAlert.description}</p>
+                  {renderJobImages(newJobAlert)}
                   <div className="mt-4 inline-flex items-center px-3 py-1 bg-gray-100 rounded-full text-xs font-medium text-gray-600">
                      <MapPin size={12} className="mr-1"/> {newJobAlert.location_address}
                   </div>
@@ -574,7 +559,6 @@ const WorkerDashboard: React.FC = () => {
          )}
       </Modal>
 
-      {/* Bottom Navigation for Mobile */}
       <div className="mobile-bottom-bar bg-white/80 backdrop-blur-xl border-t border-white/50 shadow-[0_-5px_30px_rgba(0,0,0,0.08)] z-40 pb-safe">
         <div className="flex justify-around items-center h-20 w-full">
           <button 
@@ -588,7 +572,7 @@ const WorkerDashboard: React.FC = () => {
           </button>
           <button 
              onClick={() => setActiveTab('wallet')}
-             className={`flex flex-col items-center justify-center w-full h-full relative transition-all active:scale-95 group ${activeTab === 'wallet' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+             className={`flex flex-col items-center justify-center w-full h-full relative transition-all active:scale-95 group ${activeTab === 'wallet' ? 'text-blue-600' : 'text-gray-400'}`}
           >
              <div className={`p-1.5 rounded-xl mb-1 transition-colors ${activeTab === 'wallet' ? 'bg-blue-100' : 'bg-transparent group-hover:bg-gray-100'}`}>
                 <WalletIcon size={22} className={activeTab === 'wallet' ? 'animate-bounce-in' : ''} />
@@ -597,7 +581,7 @@ const WorkerDashboard: React.FC = () => {
           </button>
           <button 
              onClick={() => setActiveTab('profile')}
-             className={`flex flex-col items-center justify-center w-full h-full relative transition-all active:scale-95 group ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
+             className={`flex flex-col items-center justify-center w-full h-full relative transition-all active:scale-95 group ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-400'}`}
           >
              <div className={`p-1.5 rounded-xl mb-1 transition-colors ${activeTab === 'profile' ? 'bg-blue-100' : 'bg-transparent group-hover:bg-gray-100'}`}>
                 <User size={22} className={activeTab === 'profile' ? 'animate-bounce-in' : ''} />

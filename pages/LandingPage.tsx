@@ -1,11 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Zap, Shield, Users, ArrowRight, Wrench, Hammer, Droplet, Palette, Car } from 'lucide-react';
+import { Search, MapPin, Zap, Shield, Users, ArrowRight } from 'lucide-react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { api } from '../services/api';
 import { ServiceCategory } from '../types';
+import CategoryIcon from '../components/CategoryIcon';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -42,18 +43,6 @@ const LandingPage: React.FC = () => {
       if (e.key === 'Enter') handleSearch();
   };
 
-  const getIcon = (iconName: string) => {
-    switch (iconName?.toLowerCase()) {
-      case 'zap': return <Zap className="text-yellow-500" size={32} />;
-      case 'wrench': return <Wrench className="text-gray-600" size={32} />;
-      case 'hammer': return <Hammer className="text-orange-600" size={32} />;
-      case 'droplet': return <Droplet className="text-blue-400" size={32} />;
-      case 'palette': return <Palette className="text-pink-500" size={32} />;
-      case 'car': return <Car className="text-green-600" size={32} />;
-      default: return <span className="text-3xl">🛠️</span>;
-    }
-  };
-
   return (
     <div className="flex flex-col overflow-hidden">
       {/* Hero Section */}
@@ -66,7 +55,7 @@ const LandingPage: React.FC = () => {
             <div className="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-pink-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-float" style={{animationDelay: '4s'}}></div>
         </div>
 
-        <div className="container mx-auto px-4 relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <div className="container mx-auto px-4 relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
             
             {/* Text Content */}
             <div className="text-center md:text-left animate-slide-up order-1">
@@ -99,27 +88,31 @@ const LandingPage: React.FC = () => {
                 <Card glass className="relative p-6 md:p-10 border-white/50 shadow-2xl">
                     <h3 className="text-2xl font-bold text-gray-900 mb-6">Quick Book</h3>
                     
-                    <div className="space-y-4">
-                        <div className="group relative">
-                            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    <div className="flex flex-col gap-4">
+                        <div className="relative w-full">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
+                                <MapPin size={20} />
+                            </div>
                             <input 
                                 type="text" 
                                 placeholder="Your Area / Pincode" 
                                 value={locationQuery}
                                 onChange={(e) => setLocationQuery(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                className="input-field w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                className="input-field pl-12"
                             />
                         </div>
-                        <div className="group relative">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <div className="relative w-full">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
+                                <Search size={20} />
+                            </div>
                             <input 
                                 type="text" 
                                 placeholder="Service (e.g. Electrician)" 
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onKeyDown={handleKeyPress}
-                                className="input-field w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                className="input-field pl-12"
                             />
                         </div>
                         <Button size="lg" className="w-full h-14 text-lg mt-2" onClick={handleSearch}>
@@ -175,8 +168,8 @@ const LandingPage: React.FC = () => {
                   onClick={() => navigate(`/dashboard?q=${encodeURIComponent(cat.name)}`)}
                   className="group flex flex-col items-center justify-center text-center p-4 md:p-6 border border-gray-100 bg-gray-50/30 hover:bg-white hover:border-blue-100 cursor-pointer"
                 >
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
-                    {getIcon(cat.icon)}
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:shadow-md transition-all duration-300 text-blue-600">
+                    <CategoryIcon iconName={cat.icon} size={28} />
                   </div>
                   <h3 className="font-bold text-gray-900 text-sm md:text-base">{cat.name}</h3>
                   <p className="text-xs font-medium text-blue-600 mt-2 bg-blue-50 px-2 py-1 rounded-md">
@@ -201,7 +194,7 @@ const LandingPage: React.FC = () => {
             <p className="text-gray-400 text-lg">We've built a platform that prioritizes speed, trust, and quality for every job.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="p-8 rounded-3xl bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-colors">
               <div className="bg-blue-500/20 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 text-blue-400">
                 <Zap size={28} />

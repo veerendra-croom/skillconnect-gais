@@ -1,7 +1,9 @@
 {
-  "name": "Copy of SkillConnect",
+  "name": "SkillConnect",
   "description": "A Progressive Web App connecting local skilled workers with customers for on-demand services.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "camera",
+    "microphone"
   ]
 }

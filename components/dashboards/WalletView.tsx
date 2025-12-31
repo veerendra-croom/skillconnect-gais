@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../../services/api';
 import { Transaction } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -8,7 +9,7 @@ import Spinner from '../Spinner';
 import Badge from '../Badge';
 import Modal from '../Modal';
 import Input from '../Input';
-import { Wallet, ArrowUpRight, ArrowDownLeft, DollarSign, TrendingUp, Clock, CreditCard, RefreshCw } from 'lucide-react';
+import { Wallet, ArrowUpRight, ArrowDownLeft, DollarSign, TrendingUp, Clock, CreditCard, RefreshCw, ChevronUp, ChevronDown } from 'lucide-react';
 import { useToast } from '../../context/ToastContext';
 
 const WalletView: React.FC = () => {
@@ -34,7 +35,6 @@ const WalletView: React.FC = () => {
         const data = await api.wallet.getTransactions(user.id);
         setTransactions(data || []);
         
-        // Calculate Balance
         const total = (data || []).reduce((acc, curr) => {
             if (curr.status === 'FAILED') return acc;
             return curr.type === 'CREDIT' ? acc + curr.amount : acc - curr.amount;
@@ -46,6 +46,25 @@ const WalletView: React.FC = () => {
         setLoading(false);
     }
   };
+
+  // Generate simple data for earnings trend (last 7 days)
+  const dailyStats = useMemo(() => {
+    const last7Days = [...Array(7)].map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toISOString().split('T')[0];
+    }).reverse();
+
+    const stats = last7Days.map(date => {
+        const dailyTotal = transactions
+            .filter(tx => tx.type === 'CREDIT' && tx.status === 'COMPLETED' && tx.created_at.startsWith(date))
+            .reduce((sum, tx) => sum + tx.amount, 0);
+        return { date, total: dailyTotal };
+    });
+
+    const maxTotal = Math.max(...stats.map(s => s.total), 1);
+    return stats.map(s => ({ ...s, percent: (s.total / maxTotal) * 100 }));
+  }, [transactions]);
 
   const handleWithdraw = async () => {
       const amount = parseFloat(withdrawAmount);
@@ -75,12 +94,11 @@ const WalletView: React.FC = () => {
   if (loading) return <div className="flex justify-center p-12"><Spinner /></div>;
 
   return (
-    <div className="space-y-8 animate-fade-in max-w-2xl mx-auto">
+    <div className="space-y-8 animate-fade-in max-w-2xl mx-auto px-1">
        {/* Premium Balance Card */}
        <div className="relative overflow-hidden rounded-[2rem] shadow-2xl transition-transform hover:scale-[1.01] duration-500 group">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black"></div>
           
-          {/* Mesh Gradient Overlay */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -mr-16 -mt-16 animate-pulse-soft"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -ml-16 -mb-16"></div>
 
@@ -113,6 +131,31 @@ const WalletView: React.FC = () => {
              </div>
           </div>
        </div>
+
+       {/* Earnings Trend Visualizer */}
+       <Card glass className="p-6">
+          <div className="flex justify-between items-center mb-6">
+              <h3 className="font-bold text-gray-900 flex items-center"><TrendingUp size={18} className="mr-2 text-emerald-500"/> Weekly Trend</h3>
+              <Badge variant="success" className="bg-emerald-50 text-emerald-700">Earnings</Badge>
+          </div>
+          <div className="flex items-end justify-between h-32 gap-2">
+              {dailyStats.map((stat, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center group relative">
+                      {/* Bar */}
+                      <div 
+                        className="w-full bg-blue-100 rounded-t-lg transition-all duration-700 ease-out group-hover:bg-blue-500 relative"
+                        style={{ height: `${stat.percent}%`, minHeight: '4px' }}
+                      >
+                         {/* Tooltip on hover */}
+                         <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
+                            ₹{stat.total}
+                         </div>
+                      </div>
+                      <span className="text-[10px] text-gray-400 mt-2 font-bold">{new Date(stat.date).toLocaleDateString([], { weekday: 'narrow' })}</span>
+                  </div>
+              ))}
+          </div>
+       </Card>
 
        {/* Transactions List */}
        <div>
@@ -149,10 +192,10 @@ const WalletView: React.FC = () => {
                                     ? 'bg-gradient-to-br from-green-100 to-emerald-200 text-emerald-700' 
                                     : 'bg-gradient-to-br from-red-50 to-orange-100 text-red-600'
                                 }`}>
-                                    {tx.type === 'CREDIT' ? <ArrowDownLeft size={24} /> : <ArrowUpRight size={24} />}
+                                    {tx.type === 'CREDIT' ? <ChevronDown size={24} /> : <ChevronUp size={24} />}
                                 </div>
                                 <div>
-                                    <p className="font-bold text-gray-900 text-sm">{tx.description}</p>
+                                    <p className="font-bold text-gray-900 text-sm truncate max-w-[150px]">{tx.description}</p>
                                     <p className="text-xs text-gray-400 font-medium mt-0.5">{new Date(tx.created_at).toLocaleDateString()}</p>
                                 </div>
                             </div>
